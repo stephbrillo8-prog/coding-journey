@@ -1,21 +1,28 @@
 #include <stdio.h>
 
-void sklubdub(char skrib[]) {
+    void sklubdub(char name[50]) 
+    {
+        printf("\n");
+        printf("Happy Birthday to you!\n");
+        printf("Happy Birthday to you!\n");
+        printf("Happy Birthday, dear %s", name);
+        printf("Happy Happy Birthday to you!!!\n");
+    }
 
-printf("What is up my guy\n");
-printf("My name is Genecis\n");
-printf("Okay then. So you are %s\n", skrib);
-printf("ya idk what me doing rn...\n");
-}
+    int main() {
+    int i, j;
+    char name[50]; 
 
-int main() {
-char ass[25] = "Nami";
-float skib = 6.5;
-double lub = 6.78;
+    printf("What is the name of the birthday celebrant?\n");
+    fgets(name, sizeof(name), stdin);
+    
+    printf("How many greetings do you want?\n");
+    scanf("%d", &i);
 
-sklubdub(ass);
-sklubdub(ass);
-sklubdub(ass);
-
+    for (j = 1; j <= i; j++)
+    {
+        sklubdub(name);
+    }
+   
 return 0;
 }
