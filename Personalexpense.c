@@ -1,10 +1,42 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
+
+/* Personal Expense Tracker in C - Built using C standard - Brillo
+
+To implement:
+1. Total expenses and category-wise expenses? - DONE
+2. Date and time of expense? - To be implemented,  Seen as comments in structs
+3. amount of expenses - DONE 
+4. Save to file and load from file? - To be implemented, Seen as comments in main function
+5. Dynamic memory allocation for expenses - To be implemented
+
+To learn:
+1. Structs 
+2. Linked lists for dynamic memory allocation, deletion and insertion of expenses
+3. malloc and free functions for dynamic memory allocation
+*/
+
+typedef struct 
+{
+    char prod_name[50];
+    double price;
+    int categories;
+  //  Date date;
+} Expense;
+
+/*typedef struct 
+{
+    int day;
+    int month;
+    int year;
+} Date;*/
 
 void show_menu() 
 {
-  printf(" ________________________________  \n");
+  printf(" _________________________________ \n");
+  printf("||                               ||\n");
   printf("|| **Personal Expense Tracker**  ||\n");
   printf("||   Please choose an option:    ||\n");
   printf("||                               ||\n");
@@ -17,38 +49,33 @@ void show_menu()
 
 void buffer()
 {
-    while (getchar() != '\n'); 
+  while (getchar() != '\n'); 
 }
 
-void delete_expense(double price[], int categories[], char prodname[][50], int delete_choice, int *pCount)
+int delete_expense(Expense expenses[], int delete_choice, int *pCount)
 {
     if (delete_choice < 0 || delete_choice >= *pCount)
     {
-        printf("Invalid number of entries found.");
-        return;
+        return 0;
     }  
     for (int i = delete_choice; i < *pCount - 1; i++)
     {
-        strcpy(prodname[i], prodname[i + 1]);
-        price[i] = price[i + 1];
-        categories[i] = categories[i + 1];
+        expenses[i] = expenses[i + 1];
     }
     (*pCount)--;
-    printf("Expense has been deleted.\n");  
-    return;
+    return 1;
 }
 
 int main()
 {
+    //FILE *file = fopen("expenses.txt", "a+");
     int options;
+    Expense expenses[50];
     int count = 0;
     int *pCount = &count;
-    char prod_name[50][50];
-    double price[50];
-    int categories[50];
     char *category_name[] = {"Food", "Travel", "Shopping", "Bills", "Others"};    
     int i;
-
+    double total_expenses = 0.0;
     do 
     {
         show_menu();
@@ -59,31 +86,42 @@ int main()
         {
             case 1:
             if (count < 50) 
-            {
+            {  
                 printf("Please enter the name of the product: ");
-                fgets(prod_name[count], sizeof(prod_name[count]), stdin);
+                fgets(expenses[count].prod_name, sizeof(expenses[count].prod_name), stdin);
                
-               if (strlen(prod_name[count]) > 0 && prod_name[count][strlen(prod_name[count]) - 1] == '\n')
-               {
-                   prod_name[count][strlen(prod_name[count]) - 1] = '\0';
-               }
-
-                printf("Please enter the price of the product: ");
-                scanf("%lf", &price[count]);
-                buffer();
-              
-              do{
-                  printf("Choose the category:\n");
-                  printf("1. Food, 2. Travel, 3. Shopping 4. Bills, 5. Others\n");
-                  scanf("%d", &categories[count]);
-                  buffer();
-
-                  if (categories[count] < 0 || categories[count] > 5)
-                  {
-                    printf("Invalid Category!\n");
-                  }
+                if (strlen(expenses[count].prod_name) > 0 && expenses[count].prod_name[strlen(expenses[count].prod_name) - 1] == '\n')
+                {
+                    expenses[count].prod_name[strlen(expenses[count].prod_name) - 1] = '\0';
                 }
-              while (categories[count] < 1 || categories[count] > 5);
+
+                do
+                {
+                  printf("Please enter the price of the product: ");
+                  scanf("%lf", &expenses[count].price);
+                  buffer();
+                      
+                  if (expenses[count].price >= 0)
+                  {
+                    break;
+                  }
+                    printf("Price can only be in numbers!");
+                }
+                while (expenses[count].price < 0);
+                
+                do
+                {
+                    printf("Choose the category:\n");
+                    printf("1. Food, 2. Travel, 3. Shopping 4. Bills, 5. Others\n");
+                    scanf("%d", &expenses[count].categories);
+                    buffer();
+  
+                    if (expenses[count].categories < 0 || expenses[count].categories > 5)
+                    {
+                      printf("Invalid Category!\n");
+                    }
+                }
+                while (expenses[count].categories < 1 || expenses[count].categories > 5);
            
                 count++;
                 printf("Expense added successfully!\n");
@@ -104,9 +142,19 @@ int main()
                 printf("Expenses:\n");
                 for (i = 0; i < count; i++) 
                 {              
-                    printf("%d. %s - %.2lf (Category: %s)\n", i + 1, prod_name[i], price[i], category_name[categories[i] - 1]);
-                }
+                    printf("%d. %s - %.2lf (Category: %s)\n", i + 1, expenses[i].prod_name, expenses[i].price, category_name[expenses[i].categories - 1]);
+                } 
             } 
+
+            for (i = 0; i < count; i++)
+            {
+             total_expenses += expenses[i].price;
+            }
+
+            printf("Total Expenses: %.2lf\n", total_expenses);
+            printf("Number of Expenses: %d\n", count);
+            total_expenses = 0.0;
+            
             break;
 
             case 3:
@@ -119,7 +167,7 @@ int main()
             printf("\nYour Current Expenses:\n");
                 for (i = 0; i < count; i++) 
                 {              
-                    printf("%d. %s - %.2lf (Category: %s)\n", i + 1, prod_name[i], price[i], category_name[categories[i] - 1]);
+                    printf("%d. %s - %.2lf (Category: %s)\n", i + 1, expenses[i].prod_name, expenses[i].price, category_name[expenses[i].categories - 1]);
                 }
 
             int delete_choice;
@@ -133,7 +181,14 @@ int main()
             }
             else
             {
-             delete_expense(price, categories, prod_name, delete_choice - 1, pCount);
+                if (delete_expense(expenses, delete_choice - 1, pCount) == 1)
+                {
+                    printf("Expense has been deleted.\n");
+                }
+                else
+                {
+                    printf("Invalid number of entries found.");
+                }
             }
 
             break;
@@ -144,5 +199,6 @@ int main()
         }
     }
     while (options != 4);
+
 return 0; 
 }
